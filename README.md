@@ -10,7 +10,7 @@
     JWT_SECRET = \<secret for accessToken>\
     REF_TOKEN_SECRET = \<secret for refreshToken>\
     PORT= \<port>\
-    DB_URI= <`mongodb://localhost:27017/tenang` for local> \
+    DB_URI= <`mongodb://localhost:27017/tenang` for local>\
    
  - If you get `Connected to the Database successfully` 
   you good to go
