@@ -1,0 +1,5611 @@
+{
+	"info": {
+		"_postman_id": "371c75d3-1b4a-4a65-afec-0a6ecdf5ae56",
+		"name": "Tenang",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15706688"
+	},
+	"item": [
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "signUp with badUserPayloads",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let badUserPayloads = pm.environment.get('badUserPayloads');\r",
+									" \r",
+									"if (!badUserPayloads || badUserPayloads.length == 0) {\r",
+									"    badUserPayloads = [\r",
+									"        { password: 'secret', firstname: 'John Doe' },\r",
+									"        { email: 'johndoe', firstname: 'John Doe' },\r",
+									"        { email: 'johndoe', password: true, firstname: 'John Doe' },\r",
+									"        { email: 'johndoe', password: 'secret'},\r",
+									"        { email: 'johndoe', password: 'secret', firstname: 0 },\r",
+									"    ]\r",
+									"}\r",
+									" \r",
+									"const currentBadUserPayload = badUserPayloads.shift();\r",
+									"pm.environment.set('currentBadUserPayload', JSON.stringify(currentBadUserPayload));\r",
+									"pm.environment.set('badUserPayloads', badUserPayloads);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 400 value', () => {\r",
+									"   pm.response.to.have.status(400);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.not.equals(' ');\r",
+									"    pm.expect(responseJson.message).to.not.equals(null);\r",
+									"});\r",
+									" \r",
+									"const repeatRequestUntilDatasetEmpty = () => {\r",
+									"    const badUserPayloads = pm.environment.get('badUserPayloads');\r",
+									" \r",
+									"    if(badUserPayloads && badUserPayloads.length > 0) {\r",
+									"        postman.setNextRequest(pm.info.requestId);\r",
+									"    } else {\r",
+									"        postman.setNextRequest(\"signUp User 1\");\r",
+									"    }\r",
+									"}\r",
+									" \r",
+									"repeatRequestUntilDatasetEmpty();"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{currentBadUserPayload}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signUp User 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 201 value', () => {\r",
+									"   pm.response.to.have.status(201);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('Berhasil menambahkan User');\r",
+									"    pm.expect(responseJson).to.ownProperty('data');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body data should have userId property and not equal to empty', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    const { data } = responseJson;\r",
+									" \r",
+									"    pm.expect(data).to.ownProperty('_id');\r",
+									"    pm.expect(data._id).to.not.equals('');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"firstname\" : \"{{newFirstName}}\",\r\n    \"lastname\" : \"{{newLastName}}\",\r\n    \"email\": \"{{newEmail}}\", \r\n    \"password\": \"{{newPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signUp User 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 201 value', () => {\r",
+									"   pm.response.to.have.status(201);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('Berhasil menambahkan User');\r",
+									"    pm.expect(responseJson).to.ownProperty('data');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body data should have userId property and not equal to empty', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    const { data } = responseJson;\r",
+									" \r",
+									"    pm.expect(data).to.ownProperty('_id');\r",
+									"    pm.expect(data._id).to.not.equals('');\r",
+									"    pm.environment.set('currentUserId2', responseJson.data._id)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"firstname\" : \"{{newFirstName}}\",\r\n    \"lastname\" : \"{{newLastName}}\",\r\n    \"email\": \"test2@mail.com\", \r\n    \"password\": \"{{newPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signUp User with existing email",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const postRequest = {\r",
+									"    url: 'http://localhost:3000/api/v1/user/register',\r",
+									"    method: 'POST',\r",
+									"    header: {\r",
+									"    'Content-Type': 'application/json',\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify({\r",
+									"            email: 'test5@mail.com',\r",
+									"            password: pm.environment.get('newPassword'),\r",
+									"            firstname: pm.environment.get('newFirstName')\r",
+									"        }),\r",
+									"    },\r",
+									"};\r",
+									" \r",
+									"pm.sendRequest(postRequest, (error, response) => {\r",
+									"    console.log(error ? error : response.json());\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 400 value', () => {\r",
+									"   pm.response.to.have.status(400);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('Gagal melakukan Sign Up, User sudah ada.');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test@mail.com\",\r\n    \"password\": \"{{newPassword}}\",\r\n    \"firstname\": \"{{newFirstName}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login user with wrong credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('it should response 401 status code', () => {\r",
+									"    pm.expect(pm.response).to.have.status(401);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"    pm.expect(responseJson.isSuccess).to.equal(false);\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.equal('Password atau email yang diberikan salah.');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"email\": \"test@mail.com\", \r\n    \"password\": \"xxx\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login user 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('it should response 201 status code', () => {\r",
+									"    pm.expect(pm.response).to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.isSuccess).to.equal(true);\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"    pm.expect(responseJson.data.accessToken).to.be.a('string');\r",
+									"    pm.expect(responseJson.data.refreshToken).to.be.a('string');\r",
+									"    \r",
+									"    pm.environment.set('accessTokenUser1', responseJson.data.accessToken);\r",
+									"    pm.environment.set('refreshTokenUser1', responseJson.data.refreshToken);\r",
+									"    pm.environment.set('currentUserId1', responseJson.data._id)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"email\": \"test@mail.com\", \r\n    \"password\": \"12345678\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login user 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('it should response 201 status code', () => {\r",
+									"    pm.expect(pm.response).to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.isSuccess).to.equal(true);\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"    pm.expect(responseJson.data.accessToken).to.be.a('string');\r",
+									"    pm.expect(responseJson.data.refreshToken).to.be.a('string');\r",
+									"    \r",
+									"    pm.environment.set('accessTokenUser2', responseJson.data.accessToken);\r",
+									"    pm.environment.set('refreshTokenUser2', responseJson.data.refreshToken);\r",
+									"    pm.environment.set('currentUserId2', responseJson.data._id)\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"email\": \"test2@mail.com\", \r\n    \"password\": \"12345678\" \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(User 1) Get user 1 by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.have.ownProperty('data');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body data should contain user object', () => {\r",
+									"    const { data } = pm.response.json();\r",
+									" \r",
+									"    pm.expect(data).to.have.ownProperty('user');\r",
+									"    pm.expect(data.user).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('user object should contain _id, email, and firstname with correct value', () => {\r",
+									"    const { data: { user } } = pm.response.json();\r",
+									" \r",
+									"    pm.expect(user).to.have.ownProperty('_id');\r",
+									"    pm.expect(user._id).to.equals(pm.environment.get('currentUserId1'));\r",
+									"    pm.expect(user).to.have.ownProperty('email');\r",
+									"    pm.expect(user.email).to.includes(pm.environment.get('newEmail'));\r",
+									"    pm.expect(user).to.have.ownProperty('firstname');\r",
+									"    pm.expect(user.firstname).to.equals(pm.environment.get('newFirstName'));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/user/profile/{{currentUserId1}}",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"profile",
+								"{{currentUserId1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "(User 2) Get user 1 by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 403 value', () => {\r",
+									"    pm.response.to.have.status(403);\r",
+									"});\r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.have.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('Tidak dapat mengakses');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser2}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/user/profile/{{currentUserId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"profile",
+								"{{currentUserId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refreshtoken",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('it should response 200 status code', () => {\r",
+									"    pm.expect(pm.response).to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.isSuccess).to.equal(true);\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"    pm.expect(responseJson.data.accessToken).to.be.a('string');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{ \r\n    \"refreshToken\": \"{{refreshTokenUser1}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/refresh",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout user with wrong _id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('it should response 404 status code', () => {\r",
+									"    pm.expect(pm.response).to.have.status(403);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.isSuccess).to.equal(false);\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.equal('Tidak dapat mengakses');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Mjc5N2RjOTc3ZDU4ZDQxMWQ1ZGQ1NGQiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2NTIxMjkyNDAsImV4cCI6MTY1MjEyOTM2MH0.UPRxafriiyApvmgy4P5TfGs2teepUfNiCePpWlah3Ik",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/logout/627a23eb998e9edab3afcd29",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"logout",
+								"627a23eb998e9edab3afcd29"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout user 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('it should response 200 status code', () => {\r",
+									"    pm.expect(pm.response).to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.isSuccess).to.equal(true);\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.equal('Logout successful');\r",
+									"    pm.environment.set('accessTokenUser1', \"\");\r",
+									"    pm.environment.set('refreshTokenUser1', \"\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Mjc5N2RjOTc3ZDU4ZDQxMWQ1ZGQ1NGQiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2NTIxMjkyNDAsImV4cCI6MTY1MjEyOTM2MH0.UPRxafriiyApvmgy4P5TfGs2teepUfNiCePpWlah3Ik",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/logout/{{currentUserId1}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"logout",
+								"{{currentUserId1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout user 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('it should response 200 status code', () => {\r",
+									"    pm.expect(pm.response).to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.includes('application/json');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"\r",
+									"    pm.expect(responseJson.isSuccess).to.equal(true);\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"    pm.expect(responseJson.message).to.be.a('string');\r",
+									"    pm.expect(responseJson.message).to.equal('Logout successful');\r",
+									"    pm.environment.set('accessTokenUser2', \"\");\r",
+									"    pm.environment.set('refreshTokenUser2', \"\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser2}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Mjc5N2RjOTc3ZDU4ZDQxMWQ1ZGQ1NGQiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2NTIxMjkyNDAsImV4cCI6MTY1MjEyOTM2MH0.UPRxafriiyApvmgy4P5TfGs2teepUfNiCePpWlah3Ik",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/logout/{{currentUserId2}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"logout",
+								"{{currentUserId2}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "No test",
+					"item": [
+						{
+							"name": "Login user 1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();\r",
+											"pm.environment.set('accessTokenUser1', responseJson.data.accessToken);\r",
+											"pm.environment.set('refreshTokenUser1', responseJson.data.refreshToken);\r",
+											"pm.environment.set('currentUserId1', responseJson.data._id)\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"email\": \"test@mail.com\", \r\n    \"password\": \"12345678\" \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "signUp User 1 Admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 201 value', () => {\r",
+											"   pm.response.to.have.status(201);\r",
+											"}); \r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+											"}); \r",
+											" \r",
+											"pm.test('response body should an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											" \r",
+											"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+											"    pm.expect(responseJson).to.ownProperty('message');\r",
+											"    pm.expect(responseJson.message).to.equals('Berhasil menambahkan User');\r",
+											"    pm.expect(responseJson).to.ownProperty('data');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body data should have userId property and not equal to empty', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    const { data } = responseJson;\r",
+											" \r",
+											"    pm.expect(data).to.ownProperty('_id');\r",
+											"    pm.expect(data._id).to.not.equals('');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"firstname\" : \"Admin\",\r\n    \"lastname\" : \"1\",\r\n    \"email\": \"admin1@mail.com\", \r\n    \"password\": \"{{newPassword}}\",\r\n    \"role\": \"admin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login Admin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();\r",
+											"pm.environment.set('accessTokenAdmin', responseJson.data.accessToken);\r",
+											"pm.environment.set('adminUserId', responseJson.data._id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"admin1@mail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update User with badPayloads",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"\r",
+									"let badUserUpdatePayloads = pm.environment.get('badUserUpdatePayloads');  // ini akan bertipe Array\r",
+									" \r",
+									"if (!badUserUpdatePayloads || badUserUpdatePayloads.length === 0) {\r",
+									"    // inisialisasi dengan sejumlah note yang tidak sesuai\r",
+									"    badUserUpdatePayloads = [\r",
+									"        { firstname: \"tsaqif\", lastname: 2 },\r",
+									"        { firstname: 1, lastname: \"razin\"},\r",
+									"        {},\r",
+									"    ]\r",
+									"}\r",
+									" \r",
+									"let currentBadUserUpdatePayloads = badUserUpdatePayloads.shift();  // hapus index 0, geser sisanya\r",
+									"pm.environment.set('currentBadUserUpdatePayloads', JSON.stringify(currentBadUserUpdatePayloads));\r",
+									"pm.environment.set('badUserUpdatePayloads', badUserUpdatePayloads);\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 400 value', () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json; charset=utf-8 value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should be an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body object should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+									"    pm.expect(responseJson.message).to.be.ok;\r",
+									"})\r",
+									"\r",
+									"const repeatRequestUntilDatasetEmpty = () => {\r",
+									"    const badNotePayloads = pm.environment.get('badNotePayloads');\r",
+									"    \r",
+									"    if(badNotePayloads && badNotePayloads.length > 0) {\r",
+									"        postman.setNextRequest('Update Notes with Bad Note Payload');\r",
+									"    }\r",
+									"}\r",
+									"\r",
+									"repeatRequestUntilDatasetEmpty();"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Mjc5N2RjOTc3ZDU4ZDQxMWQ1ZGQ1NGQiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2NTIxNDg0ODQsImV4cCI6MTY1MjE0ODYwNH0.MdBbRHVVmD_GUpWB-ECmcnv-X1u4lhvMdZ9V_Dx9VNI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{{currentBadUserUpdatePayloads}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/update/{{currentUserId1}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"update",
+								"{{currentUserId1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update User with valid Payload",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json; charset=utf-8 value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should be an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body object should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.haveOwnProperty('data');\r",
+									"    pm.expect(responseJson.data).to.be.an(\"object\");\r",
+									"})\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Mjc5N2RjOTc3ZDU4ZDQxMWQ1ZGQ1NGQiLCJyb2xlIjoiYWRtaW4iLCJpYXQiOjE2NTIxNDg0ODQsImV4cCI6MTY1MjE0ODYwNH0.MdBbRHVVmD_GUpWB-ECmcnv-X1u4lhvMdZ9V_Dx9VNI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstname\":\"tsaqif\",\r\n    \"lastname\":\"razin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/update/{{currentUserId1}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"update",
+								"{{currentUserId1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"   pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"   const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.be.an('object');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should have the correct property and value', () => {\r",
+									"  const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"   pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"   pm.expect(responseJson).to.have.ownProperty('data');\r",
+									"   pm.expect(responseJson.data).to.be.an('object');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body data should have a users array and contain at least 1 item', () => {\r",
+									"   const responseJson = pm.response.json();\r",
+									"   const { data } = responseJson;\r",
+									" \r",
+									"   pm.expect(data).to.have.ownProperty('users');\r",
+									"   pm.expect(data.users).to.be.an('array');\r",
+									"   pm.expect(data.users).lengthOf.at.least(1);\r",
+									"}); "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/list",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8')\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should be an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.have.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('User deleted');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/delete/{{currentUserId1}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"delete",
+								"{{currentUserId1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8')\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should be an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.have.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('User deleted');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/delete/{{currentUserId2}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"delete",
+								"{{currentUserId2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8')\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should be an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.have.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('User deleted');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/delete/{{adminUserId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"delete",
+								"{{adminUserId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Article",
+			"item": [
+				{
+					"name": "No Test",
+					"item": [
+						{
+							"name": "SignUp User 1",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"firstname\" : \"{{newFirstName}}\",\r\n    \"lastname\" : \"{{newLastName}}\",\r\n    \"email\": \"{{newEmail}}\", \r\n    \"password\": \"{{newPassword}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user 1",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json()\r",
+											"pm.environment.set('accessTokenUser1', responseJson.data.accessToken);\r",
+											"pm.environment.set('refreshTokenUser1', responseJson.data.refreshToken);\r",
+											"pm.environment.set('currentUserId1', responseJson.data._id)\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"email\": \"test@mail.com\", \r\n    \"password\": \"12345678\" \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "signUp User 2 Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"firstname\" : \"{{newFirstName}}\",\r\n    \"lastname\" : \"{{newLastName}}\",\r\n    \"email\": \"test2@mail.com\", \r\n    \"password\": \"{{newPassword}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user 2 Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();\r",
+											"\r",
+											"pm.environment.set('accessTokenUser2', responseJson.data.accessToken);\r",
+											"pm.environment.set('refreshTokenUser2', responseJson.data.refreshToken);\r",
+											"pm.environment.set('currentUserId2', responseJson.data._id)\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"email\": \"test2@mail.com\", \r\n    \"password\": \"12345678\" \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Create Update Delete",
+					"item": [
+						{
+							"name": "Create Article with badPayloads",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											"let badArticlePayloads = pm.environment.get('badArticlePayloads');\r",
+											" \r",
+											"if (!badArticlePayloads || badArticlePayloads.length === 0) {\r",
+											"    badArticlePayloads = [\r",
+											"        { title: 'test', body: 'test' },\r",
+											"        { tags: ['test'], body: 'test' },\r",
+											"        { title: 'test', tags: ['test'] },\r",
+											"        { title: 1, body: 'test', tags: ['test'] },\r",
+											"        { title: 'test', body: true, tags: ['test'] },\r",
+											"        { title: 'test', body: \"test\", tags: null },\r",
+											"        { title: 'test', body: \"test\", tags: [1,2] },\r",
+											"    ]\r",
+											"}\r",
+											" \r",
+											"const currentBadArticlePayload = badArticlePayloads.shift();\r",
+											"pm.environment.set('currentBadArticlePayload', JSON.stringify(currentBadArticlePayload));\r",
+											"pm.environment.set('badArticlePayloads', badArticlePayloads);"
+										],
+										"type": "text/javascript"
+									}
+								},
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 400 value', () => {\r",
+											"   pm.response.to.have.status(400);\r",
+											"}); \r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+											"}); \r",
+											" \r",
+											"pm.test('response body should an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+											"    pm.expect(responseJson).to.ownProperty('message');\r",
+											"    pm.expect(responseJson.message).to.not.equals(' ');\r",
+											"    pm.expect(responseJson.message).to.not.equals(null);\r",
+											"});\r",
+											" \r",
+											"const repeatRequestUntilDatasetEmpty = () => {\r",
+											"    const badArticlePayloads = pm.environment.get('badArticlePayloads');\r",
+											" \r",
+											"    if(badArticlePayloads && badArticlePayloads.length > 0) {\r",
+											"        postman.setNextRequest(pm.info.requestId);\r",
+											"    } else {\r",
+											"        postman.setNextRequest('Create Article');\r",
+											"    }\r",
+											"}\r",
+											" \r",
+											"repeatRequestUntilDatasetEmpty();"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser1}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{currentBadArticlePayload}}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/article",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Article",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 201 value', () => {\r",
+											"   pm.response.to.have.status(201);\r",
+											"}); \r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+											"}); \r",
+											" \r",
+											"pm.test('response body should an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											" \r",
+											"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+											"    pm.expect(responseJson).to.ownProperty('message');\r",
+											"    pm.expect(responseJson.message).to.equals('Berhasil menambahkan Article');\r",
+											"    pm.expect(responseJson).to.ownProperty('data');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"    pm.expect(responseJson.data.title).to.equals('Belajar Dasar Python');\r",
+											"    pm.expect(responseJson.data.tags).to.be.an('array');\r",
+											"    pm.expect(responseJson.data.tags[0]).to.equals('Basic');\r",
+											"    pm.expect(responseJson.data.tags[1]).to.equals('Programming');    \r",
+											"    pm.expect(responseJson.data.body).to.equals('Belajar python mudah');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body data should have _id property and not equal to empty', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    const { data } = responseJson;\r",
+											" \r",
+											"    pm.expect(data).to.ownProperty('_id');\r",
+											"    pm.expect(data._id).to.not.equals('');\r",
+											"    pm.environment.set('currentArticleId', responseJson.data._id)\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser1}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Belajar Dasar Python\",\r\n    \"tags\": [\"Basic\", \"Programming\"],\r\n    \"body\": \"Belajar python mudah\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/article",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Article",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 200 value', () => {\r",
+											"   pm.response.to.have.status(200);\r",
+											"}); \r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+											"}); \r",
+											" \r",
+											"pm.test('response body should an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											" \r",
+											"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+											"    pm.expect(responseJson).to.ownProperty('data');\r",
+											"    pm.expect(responseJson.data).to.be.an('object');\r",
+											"    pm.expect(responseJson.data.title).to.equals('Belajar Dasar Python update');\r",
+											"    pm.expect(responseJson.data.tags).to.be.an('array');\r",
+											"    pm.expect(responseJson.data.tags[0]).to.equals('Basic');\r",
+											"    pm.expect(responseJson.data.tags[1]).to.equals('Programming'); \r",
+											"    pm.expect(responseJson.data.tags[2]).to.equals('Update');    \r",
+											"    pm.expect(responseJson.data.body).to.equals('Belajar python mudah update');\r",
+											"});\r",
+											" "
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser1}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Belajar Dasar Python update\",\r\n    \"tags\": [\"Basic\", \"Programming\", \"Update\"],\r\n    \"body\": \"Belajar python mudah update\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/article/{{currentArticleId}}",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article",
+										"{{currentArticleId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Others Article",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 403 value', () => {\r",
+											"   pm.response.to.have.status(403);\r",
+											"}); \r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+											"}); \r",
+											" \r",
+											"pm.test('response body should an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											" \r",
+											"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+											"    pm.expect(responseJson).to.ownProperty('message');\r",
+											"    pm.expect(responseJson.message).to.equals(\"Can't update others article\");\r",
+											"});\r",
+											" "
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser2}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Belajar Dasar Python update\",\r\n    \"tags\": [\"Basic\", \"Programming\", \"Update\"],\r\n    \"body\": \"Belajar python mudah update\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/article/{{currentArticleId}}",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article",
+										"{{currentArticleId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Not Exist Article",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 404 value', () => {\r",
+											"   pm.response.to.have.status(404);\r",
+											"}); \r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+											"}); \r",
+											" \r",
+											"pm.test('response body should an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											" \r",
+											"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+											"    pm.expect(responseJson).to.ownProperty('message');\r",
+											"    pm.expect(responseJson.message).to.equals(\"article tidak ditemukan.\");\r",
+											"});\r",
+											" "
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser2}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Belajar Dasar Python update\",\r\n    \"tags\": [\"Basic\", \"Programming\", \"Update\"],\r\n    \"body\": \"Belajar python mudah update\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/article/628c57477efdac2e31093385",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article",
+										"628c57477efdac2e31093385"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Others Article",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 403 value', () => {\r",
+											"   pm.response.to.have.status(403);\r",
+											"}); \r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+											"}); \r",
+											" \r",
+											"pm.test('response body should an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											" \r",
+											"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+											"    pm.expect(responseJson).to.ownProperty('message');\r",
+											"    pm.expect(responseJson.message).to.equals(\"Can't delete others article\");\r",
+											"});\r",
+											" "
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser2}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/article/{{currentArticleId}}",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article",
+										"{{currentArticleId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Article",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 200 value', () => {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});\r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8')\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should be an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											" \r",
+											"    pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+											"    pm.expect(responseJson).to.have.ownProperty('message');\r",
+											"    pm.expect(responseJson.message).to.equals('Article deleted');\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser1}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/article/{{currentArticleId}}",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article",
+										"{{currentArticleId}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Not Exist Article",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('response status code should have 404 value', () => {\r",
+											"   pm.response.to.have.status(404);\r",
+											"}); \r",
+											" \r",
+											"pm.test('response Content-Type header should have application/json value', () => {\r",
+											"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+											"}); \r",
+											" \r",
+											"pm.test('response body should an object', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											"    pm.expect(responseJson).to.be.an('object');\r",
+											"});\r",
+											" \r",
+											"pm.test('response body should have correct property and value', () => {\r",
+											"    const responseJson = pm.response.json();\r",
+											" \r",
+											"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+											"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+											"    pm.expect(responseJson).to.ownProperty('message');\r",
+											"    pm.expect(responseJson.message).to.equals(\"article tidak ditemukan.\");\r",
+											"});\r",
+											" "
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser1}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Belajar Dasar Python update\",\r\n    \"tags\": [\"Basic\", \"Programming\", \"Update\"],\r\n    \"body\": \"Belajar python mudah update\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/article/{{currentArticleId}}",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article",
+										"{{currentArticleId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Search, Filtering and Pagination",
+					"item": [
+						{
+							"name": "Create (No Test)",
+							"item": [
+								{
+									"name": "Create Article 1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"\r",
+													"pm.environment.set('ArticleId1', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Dasar Python\",\r\n    \"tags\": [\"Basic\", \"Programming\"],\r\n    \"body\": \"Belajar python mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId2', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Dasar Golang\",\r\n    \"tags\": [\"Basic\", \"Programming\"],\r\n    \"body\": \"Belajar golang mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 3",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId3', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Dasar Javascript\",\r\n    \"tags\": [\"Basic\", \"Programming\"],\r\n    \"body\": \"Belajar javascript mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 4",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId4', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Intermediate Python\",\r\n    \"tags\": [\"Intermediate\", \"Programming\"],\r\n    \"body\": \"Belajar python intermediate mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 5",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId5', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Intermediate Golang\",\r\n    \"tags\": [\"Intermediate\", \"Programming\"],\r\n    \"body\": \"Belajar intermediate golang mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 6",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId6', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Intermediate Javascript\",\r\n    \"tags\": [\"Intermediate\", \"Programming\"],\r\n    \"body\": \"Belajar Intermediate javascript mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 7",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId7', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Expert Python\",\r\n    \"tags\": [\"Expert\", \"Programming\"],\r\n    \"body\": \"Belajar Expert python mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 8",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId8', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Expert Golang\",\r\n    \"tags\": [\"Expert\", \"Programming\"],\r\n    \"body\": \"Belajar Expert golang mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 9",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId9', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Expert Javascript\",\r\n    \"tags\": [\"Expert\", \"Programming\"],\r\n    \"body\": \"Belajar Expert javascript mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Article 10",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('ArticleId10', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"title\": \"Belajar Back end Web\",\r\n    \"tags\": [\"Master\", \"Programming\"],\r\n    \"body\": \"Belajar Master Back end Web mudah\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Test",
+							"item": [
+								{
+									"name": "Read Article with filter search pagination",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test('response status code should have 200 value', () => {\r",
+													"   pm.response.to.have.status(200);\r",
+													"});\r",
+													"\r",
+													"pm.test('response Content-Type header should have application/json value', () => {\r",
+													"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+													"});\r",
+													"\r",
+													"pm.test('response body should an object', () => {\r",
+													"   const responseJson = pm.response.json();\r",
+													"   pm.expect(responseJson).to.be.an('object');\r",
+													"}); \r",
+													"\r",
+													"pm.test('response body should have the correct property and value', () => {\r",
+													"  const responseJson = pm.response.json();\r",
+													"   pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+													"   pm.expect(responseJson.isSuccess).to.equals(true);\r",
+													"   pm.expect(responseJson).to.have.ownProperty('data');\r",
+													"   pm.expect(responseJson.data).to.be.an('object');\r",
+													"   pm.expect(responseJson.data.articles[0].title).to.equals(\"Belajar Dasar Python\");\r",
+													"   pm.expect(responseJson.data.articles[1].title).to.equals(\"Belajar Dasar Golang\");\r",
+													"   pm.expect(responseJson.data.meta.total).to.equals(3);\r",
+													"   pm.expect(responseJson.data.meta.currentPage).to.equals(1);\r",
+													"   pm.expect(responseJson.data.meta.perPage).to.equals(2);\r",
+													"   pm.expect(responseJson.data.meta.totalPages).to.equals(2);\r",
+													"   \r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "localhost:4000/api/v1/article?tags=Basic&userId={{currentUserId1}}&page=1&limit=2",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											],
+											"query": [
+												{
+													"key": "tags",
+													"value": "Basic"
+												},
+												{
+													"key": "userId",
+													"value": "{{currentUserId1}}"
+												},
+												{
+													"key": "page",
+													"value": "1"
+												},
+												{
+													"key": "limit",
+													"value": "2"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Read Article with filter search pagination  No Match",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test('response status code should have 404 value', () => {\r",
+													"   pm.response.to.have.status(404);\r",
+													"});\r",
+													"\r",
+													"pm.test('response Content-Type header should have application/json value', () => {\r",
+													"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+													"});\r",
+													"\r",
+													"pm.test('response body should an object', () => {\r",
+													"   const responseJson = pm.response.json();\r",
+													"   pm.expect(responseJson).to.be.an('object');\r",
+													"}); \r",
+													"\r",
+													"pm.test('response body should have the correct property and value', () => {\r",
+													"  const responseJson = pm.response.json();\r",
+													"   pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+													"   pm.expect(responseJson.isSuccess).to.equals(false);\r",
+													"   pm.expect(responseJson.message).to.equals(\"We dont have Article you looking for\");\r",
+													"});\r",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "localhost:4000/api/v1/article?tags=Basic&userId={{currentUserId2}}&page=1&limit=2",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article"
+											],
+											"query": [
+												{
+													"key": "tags",
+													"value": "Basic"
+												},
+												{
+													"key": "userId",
+													"value": "{{currentUserId2}}"
+												},
+												{
+													"key": "page",
+													"value": "1"
+												},
+												{
+													"key": "limit",
+													"value": "2"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Delete (No Test)",
+							"item": [
+								{
+									"name": "Delete Article1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId1}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId2}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId2}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article3",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId3}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId3}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article4",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId4}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId4}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article5",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId5}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId5}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article6",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId6}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId6}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article7",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId7}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId7}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article8",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId8}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId8}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article9",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId9}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId9}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Article10",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenUser1}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "localhost:4000/api/v1/article/{{ArticleId10}}",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"article",
+												"{{ArticleId10}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "signUp Admin",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{ \r\n    \"firstname\" : \"Admin\",\r\n    \"lastname\" : \"1\",\r\n    \"email\": \"admin1@mail.com\", \r\n    \"password\": \"{{newPassword}}\",\r\n    \"role\": \"admin\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:4000/api/v1/user/register",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"user",
+												"register"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Login Admin",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"const responseJson = pm.response.json();\r",
+													"pm.environment.set('accessTokenAdmin', responseJson.data.accessToken);\r",
+													"pm.environment.set('adminUserId', responseJson.data._id)"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\r\n    \"email\": \"admin1@mail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://localhost:4000/api/v1/user/login",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"user",
+												"login"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete User 1",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenAdmin}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:4000/api/v1/user/delete/{{currentUserId1}}",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"user",
+												"delete",
+												"{{currentUserId1}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete User 2",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenAdmin}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:4000/api/v1/user/delete/{{currentUserId2}}",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"user",
+												"delete",
+												"{{currentUserId2}}"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Delete Admin",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test('response status code should have 200 value', () => {\r",
+													"    pm.response.to.have.status(200);\r",
+													"});\r",
+													" \r",
+													"pm.test('response Content-Type header should have application/json value', () => {\r",
+													"    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8')\r",
+													"});\r",
+													" \r",
+													"pm.test('response body should be an object', () => {\r",
+													"    const responseJson = pm.response.json();\r",
+													"    pm.expect(responseJson).to.be.an('object');\r",
+													"});\r",
+													" \r",
+													"pm.test('response body should have correct property and value', () => {\r",
+													"    const responseJson = pm.response.json();\r",
+													" \r",
+													"    pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+													"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+													"    pm.expect(responseJson).to.have.ownProperty('message');\r",
+													"    pm.expect(responseJson.message).to.equals('User deleted');\r",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"auth": {
+											"type": "apikey",
+											"apikey": [
+												{
+													"key": "value",
+													"value": "{{accessTokenAdmin}}",
+													"type": "string"
+												},
+												{
+													"key": "key",
+													"value": "token",
+													"type": "string"
+												}
+											]
+										},
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "http://localhost:4000/api/v1/user/delete/{{adminUserId}}",
+											"protocol": "http",
+											"host": [
+												"localhost"
+											],
+											"port": "4000",
+											"path": [
+												"api",
+												"v1",
+												"user",
+												"delete",
+												"{{adminUserId}}"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Comment",
+			"item": [
+				{
+					"name": "No Test",
+					"item": [
+						{
+							"name": "SignUp User 1 Copy",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"firstname\" : \"{{newFirstName}}\",\r\n    \"lastname\" : \"{{newLastName}}\",\r\n    \"email\": \"{{newEmail}}\", \r\n    \"password\": \"{{newPassword}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user 1 Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json()\r",
+											"pm.environment.set('accessTokenUser1', responseJson.data.accessToken);\r",
+											"pm.environment.set('refreshTokenUser1', responseJson.data.refreshToken);\r",
+											"pm.environment.set('currentUserId1', responseJson.data._id)\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"email\": \"test@mail.com\", \r\n    \"password\": \"12345678\" \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Article 1 Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();\r",
+											"\r",
+											"pm.environment.set('ArticleId1', responseJson.data._id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "apikey",
+									"apikey": [
+										{
+											"key": "value",
+											"value": "{{accessTokenUser1}}",
+											"type": "string"
+										},
+										{
+											"key": "key",
+											"value": "token",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Belajar Dasar Python\",\r\n    \"tags\": [\"Basic\", \"Programming\"],\r\n    \"body\": \"Belajar python mudah\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "localhost:4000/api/v1/article",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"article"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "signUp User 1 Admin Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"firstname\" : \"Admin\",\r\n    \"lastname\" : \"1\",\r\n    \"email\": \"admin1@mail.com\", \r\n    \"password\": \"{{newPassword}}\",\r\n    \"role\": \"admin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login Admin Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();\r",
+											"pm.environment.set('accessTokenAdmin', responseJson.data.accessToken);\r",
+											"pm.environment.set('adminUserId', responseJson.data._id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\": \"admin1@mail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "signUp User 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"firstname\" : \"{{newFirstName}}\",\r\n    \"lastname\" : \"{{newLastName}}\",\r\n    \"email\": \"test2@mail.com\", \r\n    \"password\": \"{{newPassword}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/register",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"register"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Login user 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();\r",
+											"\r",
+											"pm.environment.set('accessTokenUser2', responseJson.data.accessToken);\r",
+											"pm.environment.set('refreshTokenUser2', responseJson.data.refreshToken);\r",
+											"pm.environment.set('currentUserId2', responseJson.data._id)\r",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"email\": \"test2@mail.com\", \r\n    \"password\": \"12345678\" \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:4000/api/v1/user/login",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "4000",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"login"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Create Comment with badPayloads Copy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let badCommentPayloads = pm.environment.get('badCommentPayloads');\r",
+									" \r",
+									"if (!badCommentPayloads || badCommentPayloads.length === 0) {\r",
+									"    badCommentPayloads = [\r",
+									"        { body: \"\" },\r",
+									"        { },\r",
+									"        { body: 1 },\r",
+									"        { title: 1, body: 'test', tags: ['test'] },\r",
+									"    ]\r",
+									"}\r",
+									" \r",
+									"const currentBadCommentPayload = badCommentPayloads.shift();\r",
+									"pm.environment.set('currentBadCommentPayload', JSON.stringify(currentBadCommentPayload));\r",
+									"pm.environment.set('badCommentPayloads', badCommentPayloads);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 400 value', () => {\r",
+									"   pm.response.to.have.status(400);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.not.equals(' ');\r",
+									"    pm.expect(responseJson.message).to.not.equals(null);\r",
+									"});\r",
+									" \r",
+									"const repeatRequestUntilDatasetEmpty = () => {\r",
+									"    const badCommentPayloads = pm.environment.get('badCommentPayloads');\r",
+									" \r",
+									"    if(badCommentPayloads && badCommentPayloads.length > 0) {\r",
+									"        postman.setNextRequest(pm.info.requestId);\r",
+									"    } else {\r",
+									"        postman.setNextRequest('Read Comments in Article with Empty Comment Data');\r",
+									"    }\r",
+									"}\r",
+									" \r",
+									"repeatRequestUntilDatasetEmpty();"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{currentBadCommentPayload}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/comment/{{ArticleId1}}/comments",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{ArticleId1}}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read Comments in Article with Empty Comment Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 404 value', () => {\r",
+									"   pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"   const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.be.an('object');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should have the correct property and value', () => {\r",
+									"  const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"   pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"   pm.expect(responseJson).to.have.ownProperty('message');\r",
+									"   pm.expect(responseJson.message).to.equals('No comments in this Article');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/comment/{{ArticleId1}}/comments",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{ArticleId1}}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read One Comment With No Exist Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 404 value', () => {\r",
+									"   pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"   const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.be.an('object');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should have the correct property and value', () => {\r",
+									"  const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"   pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"   pm.expect(responseJson).to.have.ownProperty('message');\r",
+									"   pm.expect(responseJson.message).to.equals('Comment tidak ditemukan.');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/comment/{{CommentId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{CommentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 201 value', () => {\r",
+									"   pm.response.to.have.status(201);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('Berhasil menambahkan Comment');\r",
+									"    pm.expect(responseJson).to.ownProperty('data');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');\r",
+									"    pm.expect(responseJson.data.body).to.equals('nice article');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body data should have _id property and not equal to empty', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    const { data } = responseJson;\r",
+									" \r",
+									"    pm.expect(data).to.ownProperty('_id');\r",
+									"    pm.expect(data._id).to.not.equals('');\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json()\r",
+									"pm.environment.set('CommentId', responseJson.data._id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"body\": \"nice article\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/comment/{{ArticleId1}}/comments",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{ArticleId1}}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read All Comments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"   pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"   const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.be.an('object');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should have the correct property and value', () => {\r",
+									"  const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"   pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"   pm.expect(responseJson).to.have.ownProperty('data');\r",
+									"   pm.expect(responseJson.data.comments).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body data should have a comment array and contain at least 1 item', () => {\r",
+									"   const responseJson = pm.response.json();\r",
+									"   const { data } = responseJson;\r",
+									" \r",
+									"   pm.expect(data).to.have.ownProperty('comments');\r",
+									"   pm.expect(data.comments).to.be.an('array');\r",
+									"   pm.expect(data.comments).lengthOf.at.least(1);\r",
+									"}); "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/comment/{{ArticleId1}}/comments",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{ArticleId1}}",
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read One Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"   pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"   pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"});\r",
+									"\r",
+									"pm.test('response body should an object', () => {\r",
+									"   const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.be.an('object');\r",
+									"}); \r",
+									"\r",
+									"pm.test('response body should have the correct property and value', () => {\r",
+									"  const responseJson = pm.response.json();\r",
+									"   pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"   pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"   pm.expect(responseJson).to.have.ownProperty('data');\r",
+									"   pm.expect(responseJson.data).to.be.an('object');\r",
+									"   pm.expect(responseJson.data).to.have.ownProperty('body');\r",
+									"   pm.expect(responseJson.data.body).to.equals('nice article');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/comment/{{CommentId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{CommentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Comment Update",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"   pm.response.to.have.status(200);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.ownProperty('data');\r",
+									"    pm.expect(responseJson.data).to.be.an('object');    \r",
+									"    pm.expect(responseJson.data.body).to.equals('Update comment');\r",
+									"});\r",
+									" "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"body\": \"Update comment\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/comment/{{CommentId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{CommentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Others Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 403 value', () => {\r",
+									"   pm.response.to.have.status(403);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals(\"Can't update others comment\");\r",
+									"});\r",
+									" "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser2}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"body\": \"Update comment failed test\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/comment/{{CommentId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{CommentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Not Exist Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 404 value', () => {\r",
+									"   pm.response.to.have.status(404);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals(\"comment tidak ditemukan.\");\r",
+									"});\r",
+									" "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser2}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Belajar Dasar Python update\",\r\n    \"tags\": [\"Basic\", \"Programming\", \"Update\"],\r\n    \"body\": \"Belajar python mudah update\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/comment/628c57477efdac2e31093385",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"628c57477efdac2e31093385"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Others Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 403 value', () => {\r",
+									"   pm.response.to.have.status(403);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals(\"Can't delete others comment\");\r",
+									"});\r",
+									" "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser2}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/comment/{{CommentId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{CommentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 200 value', () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8')\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should be an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.have.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(true);\r",
+									"    pm.expect(responseJson).to.have.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals('Comment deleted');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/comment/{{CommentId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{CommentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Not Exist Comment",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('response status code should have 404 value', () => {\r",
+									"   pm.response.to.have.status(404);\r",
+									"}); \r",
+									" \r",
+									"pm.test('response Content-Type header should have application/json value', () => {\r",
+									"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+									"}); \r",
+									" \r",
+									"pm.test('response body should an object', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									"    pm.expect(responseJson).to.be.an('object');\r",
+									"});\r",
+									" \r",
+									"pm.test('response body should have correct property and value', () => {\r",
+									"    const responseJson = pm.response.json();\r",
+									" \r",
+									"    pm.expect(responseJson).to.ownProperty('isSuccess');\r",
+									"    pm.expect(responseJson.isSuccess).to.equals(false);\r",
+									"    pm.expect(responseJson).to.ownProperty('message');\r",
+									"    pm.expect(responseJson.message).to.equals(\"comment tidak ditemukan.\");\r",
+									"});\r",
+									" "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Belajar Dasar Python update\",\r\n    \"tags\": [\"Basic\", \"Programming\", \"Update\"],\r\n    \"body\": \"Belajar python mudah update\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/api/v1/comment/{{CommentId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"comment",
+								"{{CommentId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Article Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenUser1}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:4000/api/v1/article/{{ArticleId1}}",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"article",
+								"{{ArticleId1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User 1 Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/delete/{{currentUserId1}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"delete",
+								"{{currentUserId1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User 2 Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/delete/{{currentUserId2}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"delete",
+								"{{currentUserId2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Admin Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{accessTokenAdmin}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "token",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:4000/api/v1/user/delete/{{adminUserId}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"delete",
+								"{{adminUserId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
